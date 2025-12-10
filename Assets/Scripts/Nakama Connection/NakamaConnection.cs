@@ -20,10 +20,20 @@ public class NakamaConnection : ScriptableObject
     {
         Client = new Nakama.Client(scheme, host, port, serverKey, UnityWebRequestAdapter.Instance);
         var deviceId = playerTag ;
+        
         Session = await Client.AuthenticateDeviceAsync(deviceId);
+        var resault = await SetRandomUserName();
+        await Client.UpdateAccountAsync(Session,resault);
+        Debug.Log($"user name : {Session.Username}");
         Socket= Client.NewSocket();
         await Socket.ConnectAsync(Session, true);
         Debug.Log($"Connected : {Socket.IsConnected}");
+    }
+    
+    public async Task<string> SetRandomUserName()
+    {
+        var response = await Client.RpcAsync(Session,"random_username","");
+        return response.Payload;
     }
 
     public async Task FindMatch()
